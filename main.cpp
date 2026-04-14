@@ -5,7 +5,7 @@
 #include <cmath>
 #include <functional>
 #include <fstream>
-
+#include <cassert>
 
 struct Node{
     double x, y;
@@ -18,6 +18,55 @@ struct Node{
 };
 struct Element{
     int n1, n2, n3;
+};
+
+// implémentation basé sur : https://phtournier.pages.math.cnrs.fr/5mm30/csr/
+struct CSRMatrix {
+    int n_ligne;
+    int n_colonne;
+    std::vector<int> row;
+    std::vector<int> col;
+    std::vector<double> values;
+
+    CSRMatrix(const std::vector<std::vector<double>> &all_values)
+    {
+        const double eps = 1e-14;
+        n_ligne = all_values.size();
+        n_colonne = all_values[0].size();
+        row.reserve(n_ligne + 1);
+
+        for (int i = 0; i < n_ligne; i++){
+            row.push_back(values.size());
+            for(int j = 0; j < n_colonne; j++){
+                const double value = all_values[i][j];
+                // Non nul
+                if (std::abs(value) > eps){
+                    values.push_back(value);
+                    col.push_back(j);
+                }
+            }
+        }
+        row.push_back(values.size());
+    }
+
+    std::vector<double> mult_with_v(const std::vector<double> &v){
+        assert(v.size() == n_colonne);
+
+        std::vector<double> res(n_ligne, 0.);
+
+        for (int i = 0; i < n_ligne; i++){
+            
+            int begin_index = row[i];
+            int next_index = row[i+1];
+            double val = 0.;
+            for (int j = begin_index; j < next_index; j++){
+                val += values[j] * v[col[j]];
+            }
+            res[i] = val;
+        }
+
+        return res;
+    }
 };
 
 // On génère les points sur [0, 1]²... 
@@ -365,7 +414,8 @@ std::vector<double> solve_with_gauss(std::vector<std::vector<double>> K, std::ve
 
 const double PI = 3.141592653589793;
 
-int main(){
+
+void test2(){
     // On résoud : -laplacien(u) = f + dirichlet avec une méthode d'élément fini P1
     int N;
     std::cout << "Discrétisation N ?\n";
@@ -390,6 +440,26 @@ int main(){
     
     double err = error_l2(nodes, triangles, U, solution_exacte);
     std::cout << "Error L2 (N=" + std::to_string(N) + ") : " << err << "\n";
+}
+
+int main(){
+    CSRMatrix mat = CSRMatrix({{1, 0, 2}, {0, 3, 0}, {4, 0, 5}});
+    std::vector<double> vect = {1, 2, 3};
+    std::cout << "Info Matrice\n";
+    for (const auto& v : mat.row){
+        std::cout << v << ", ";
+    }
+    std::cout << "\n";
+    for (const auto& v : mat.col){
+        std::cout << v << ", ";
+    }
+    std::cout << "\n";
+    for (const auto& v : mat.values){
+        std::cout << v << ", ";
+    }
+    std::cout << "\n";
+    display_vec(mat.mult_with_v(vect));
+    //test2();
     return 0;
 }
 

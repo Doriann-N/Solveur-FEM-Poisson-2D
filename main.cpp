@@ -49,7 +49,7 @@ struct CSRMatrix {
         row.push_back(values.size());
     }
 
-    std::vector<double> mult_with_v(const std::vector<double> &v){
+    std::vector<double> mult_with_v(const std::vector<double> &v) const{
         assert(v.size() == n_colonne);
 
         std::vector<double> res(n_ligne, 0.);
@@ -411,6 +411,62 @@ std::vector<double> solve_with_gauss(std::vector<std::vector<double>> K, std::ve
     return U;
 }
 
+double dot(const std::vector<double>& u, const std::vector<double>& v){
+    assert (u.size() == v.size());
+    double res = 0;
+    for (int i = 0; i < u.size(); i++){
+        res += u[i] * v[i];
+    }
+    return res;
+}
+// axpy = alpha * x + y, on modifie y
+void axpy(double alpha, const std::vector<double>& x, std::vector<double> &y){
+    assert (x.size() == y.size());
+
+    for (int i = 0; i< x.size(); i++){
+        y[i] += alpha * x[i];
+    }
+}
+
+// ax = alpha * x, on modifie x
+void ax(double alpha, std::vector<double>& x){
+    for (int i = 0; i < x.size(); i++){
+        x[i] *= alpha;
+    }
+}
+
+
+// Gradient conjugué
+std::vector<double> solve_with_gc(const CSRMatrix &A, const std::vector<double> &b, int max_iter = 5){
+    std::vector<double> x(b.size(), 0.);
+    std::vector<double> r = b;
+    std::vector<double> p = r;
+    const double eps = 1.e-14;
+    for (int k = 0; k < max_iter; k++){
+        auto Ap = A.mult_with_v(p);
+        double r_squared = dot(r, r);
+        double p_dot_Ap = dot(p, Ap);
+        if (std::abs(p_dot_Ap) < eps) 
+            break;
+        double alpha = r_squared / p_dot_Ap;
+        // x = x + alpha * p
+        axpy(alpha, p, x);
+        // r = r - alpha * Ap
+        axpy(-alpha, Ap, r); // modifie r_k pour r_next
+        double r_next_squared = dot(r, r);
+        if (r_next_squared < eps) {
+            std::cout << "Iteration : " << k << " Residu : " << r_next_squared << "\n";
+            break;
+        }  
+        double beta = r_next_squared / r_squared;
+        // p = beta * p 
+        ax(beta, p);
+        // p = p + r
+        axpy(1., r, p);
+    }
+
+    return x;
+}
 
 const double PI = 3.141592653589793;
 
@@ -442,7 +498,7 @@ void test2(){
     std::cout << "Error L2 (N=" + std::to_string(N) + ") : " << err << "\n";
 }
 
-int main(){
+void test3(){
     CSRMatrix mat = CSRMatrix({{1, 0, 2}, {0, 3, 0}, {4, 0, 5}});
     std::vector<double> vect = {1, 2, 3};
     std::cout << "Info Matrice\n";
@@ -460,6 +516,16 @@ int main(){
     std::cout << "\n";
     display_vec(mat.mult_with_v(vect));
     //test2();
-    return 0;
 }
 
+void test4(){
+    CSRMatrix mat = CSRMatrix({{4, 1}, {1, 3}});
+    std::vector<double> b = {{1}, {2}};
+    std::vector<double> x = solve_with_gc(mat, b);
+    display_vec(x);
+}
+
+int main(){
+    test4();
+    return 0;
+}

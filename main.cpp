@@ -526,6 +526,31 @@ void test4(){
 }
 
 int main(){
-    test4();
+    
+int N;
+    std::cout << "Discrétisation N ?\n";
+    std::cin >> N;
+    std::vector<Node> nodes = setup_nodes(N);
+    std::vector<Element> triangles = setup_triangles(N);
+    std::function<double(double, double)> f = [](double x, double y)->double{ 
+        return 2 * PI * PI * sin(PI * x) * sin(PI * y);};
+    std::function<double(double, double)> solution_exacte = [](double x, double y)->double{
+        return sin(PI * x) * sin(PI*y);
+    };
+    auto K = get_global_mat(nodes, triangles);
+    auto F = get_global_f(nodes, triangles, f);
+    set_dirichlet_condition(nodes, K, F);
+    //display_mat(K);
+    //display_vec(F);
+    CSRMatrix csr_mat_K = CSRMatrix(K);
+    std::vector<double> U = solve_with_gc(csr_mat_K, F);
+    //display_mat(K);
+    //display_vec(F);
+    std::string file_name = "solution_comparer_N" + std::to_string(N);
+    export_for_paraview(nodes, triangles, U, solution_exacte, file_name);
+    
+    double err = error_l2(nodes, triangles, U, solution_exacte);
+    std::cout << "Error L2 (N=" + std::to_string(N) + ") : " << err << "\n";
+
     return 0;
 }

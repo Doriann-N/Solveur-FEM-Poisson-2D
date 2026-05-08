@@ -4,7 +4,8 @@ double error_l2(const std::vector<Node> &nodes, const std::vector<Element> &tria
     const std::vector<double> &U_h, 
     const std::function<double(double, double)> &sol_exa){
     double error = 0.;
-
+    int n = triangles.size();
+    #pragma omp parallel for reduction(+:error) if(n > 1000)
     for (const auto& t : triangles){
         const Node &A = nodes[t.n1];
         const Node &B = nodes[t.n2];
@@ -17,4 +18,15 @@ double error_l2(const std::vector<Node> &nodes, const std::vector<Element> &tria
     }
 
     return std::sqrt(error);
+}
+
+std::vector<double> errors(const std::vector<double>& u_approximation, const std::vector<double>& u_solution)
+{
+    int n = u_approximation.size();
+    std::vector<double> errs(n, 0.);
+    #pragma omp parallel for
+    for (int i = 0; i < n; i++){
+        errs[i] = std::abs(u_approximation[i] - u_solution[i]);
+    }
+    return errs;
 }

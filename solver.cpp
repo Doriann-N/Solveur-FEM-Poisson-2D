@@ -44,7 +44,7 @@ std::vector<double> solve_with_gauss(std::vector<std::vector<double>> K, std::ve
 
 
 // Gradient conjugué
-std::vector<double> solve_with_gc(const CSRMatrix &A, const std::vector<double> &b, int max_iter){
+std::vector<double> solve_with_gc(const CSRMatrix &A, const std::vector<double> &b, int max_iter, const bool verbose = false){
     std::vector<double> x(b.size(), 0.);
     std::vector<double> r = b;
     std::vector<double> p = r;
@@ -53,24 +53,32 @@ std::vector<double> solve_with_gc(const CSRMatrix &A, const std::vector<double> 
         auto Ap = A.mult_with_v(p);
         double r_squared = dot(r, r);
         double p_dot_Ap = dot(p, Ap);
-        if (std::abs(p_dot_Ap) < eps) 
+        //printf("r_squared : %f, p_dot_Ap : %f\n", r_squared, p_dot_Ap);
+        if (std::abs(p_dot_Ap) < eps){
+            std::cout << "Problem : p dot Ap = 0\n";
             break;
+        }
         double alpha = r_squared / p_dot_Ap;
         // x = x + alpha * p
         axpy(alpha, p, x);
         // r = r - alpha * Ap
         axpy(-alpha, Ap, r); // modifie r_k pour r_next
+        //printf("r : (%f,%f)\n", r[0], r[1]);
         double r_next_squared = dot(r, r);
         if (r_next_squared < eps) {
-            std::cout << "Iteration : " << k << " Residu : " << r_next_squared << "\n";
+            if (verbose) std::cout << "Iteration : " << k << " Residu : " << r_next_squared << "\n";
             break;
-        }  
-        double beta = r_next_squared / r_squared;
-        // p = beta * p 
-        ax(beta, p);
-        // p = p + r
-        axpy(1., r, p);
-    }
+        } 
 
+        double beta = r_next_squared / r_squared;
+        // p = r + beta * p;
+        std::vector<double> p_new = r;
+        axpy(beta, p, p_new);
+        p = p_new;
+        //// p = beta * p 
+        //ax(beta, p);
+        //// p = p + r
+        //axpy(1., r, p);
+    }
     return x;
 }

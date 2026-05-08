@@ -24,11 +24,11 @@ int ij_to_index(int i, int j, int N){
 // Défini l'index des points du triangle, donc en soit le maillage
 // maillage actuel : (Inversé une fois sur 2)
 // +*****+*****+...
-// **    **    *
-// * *   * *   *
-// *  *  *  *  *
-// *   * *   * *
-// *    **    **
+// **    *    *
+// * *   *   **
+// *  *  *  * *
+// *   * * *  *
+// *    ***   *
 // +*****+*****+...
 std::vector<Element> setup_triangles(int N){
     std::vector<Element> triangles;
@@ -64,14 +64,9 @@ std::vector<Element> setup_triangles(int N){
     }
     return triangles;
 }
-//#include <iostream>
 // Air orienté, moitié du produit vectoriel 
 double triangle_area(const Node& A, const Node& B, const Node& C){
     double double_area = ((B.x - A.x)*(C.y - A.y) - (C.x - A.x)*(B.y - A.y));
     //if (double_area < 0) std::cout << "Air négative, attention...\n";
     return 0.5 * double_area;
-}
-
-Node oui_voila(){
-    return Node{1, 1};
 }

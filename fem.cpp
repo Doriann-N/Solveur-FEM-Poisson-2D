@@ -41,7 +41,6 @@ get_global_mat(const std::vector<Node> &nodes, const std::vector<Element> &trian
     for (const auto& t : triangles){
         auto Ke = get_elementaire_mat(nodes, t);
         const int indices[3] = {t.n1, t.n2, t.n3};
-
         for (int i = 0; i < 3; i++){
             for (int j = 0; j < 3; j++){
                 K[indices[i]][indices[j]] += Ke[i][j]; 
@@ -92,11 +91,12 @@ void set_dirichlet_condition(const std::vector<Node> &nodes,
     double y_limit = 1.;
     int n = nodes.size();
     for (int i = 0; i < n; i++){
-        if (nodes[i].is_on_boundary(x_limit, y_limit)){
-            
-            for (int j = 0; j < nodes.size(); j++){
+        //printf("On boundary %d: %d\n", i, nodes[i].is_on_boundary(x_limit, y_limit));
+        bool on_boundary = nodes[i].is_on_boundary(x_limit, y_limit);
+        if (on_boundary){
+            for (int j = 0; j < n; j++){
                 K[i][j] = 0.;
-                K[j][i] = 0.;
+                //K[j][i] = 0.;
             }
             K[i][i] = 1.;
             F[i] = 0.;

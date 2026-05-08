@@ -1,12 +1,10 @@
-//#include <array>
-
 #include "mesh_data.hpp"
-#include "paraview_export.hpp"
 #include "csr_matrix.hpp"
 #include "fem.hpp"
 #include "error.hpp"
 #include "linalgebra.hpp"
 #include "solver.hpp"
+#include "vtk_writer.hpp"
 
 const double PI = 3.141592653589793;
 
@@ -27,7 +25,17 @@ void display_vec(const std::vector<double> &v){
     for (int i = 0; i < n; i++){ std::cout << v[i] << "\n";}
 }
 
-// Test pour voir coord des nodes, index triangle et air triangle
+std::vector<double> sample_function_on_nodes(const std::vector<Node> &nodes, 
+    const std::function<double(double, double)> &func){
+    std::vector<double> sample;
+    sample.reserve(nodes.size());
+    for (const auto &node : nodes){
+        sample.push_back(func(node.x, node.y));
+    }
+    return sample;
+}
+
+/* // Test pour voir coord des nodes, index triangle et air triangle
 void test1() {
     int N = 2;
     std::vector<Node> nodes = setup_nodes(N);
@@ -107,33 +115,101 @@ void test4(){
     std::vector<double> b = {{1}, {2}};
     std::vector<double> x = solve_with_gc(mat, b, 5);
     display_vec(x);
+} */
+
+void check_l2_convergence(){
+    // Membre de droite de l'équation
+    std::function<double(double, double)> f = [](double x, double y)->double{ 
+        return 2 * PI * PI * sin(PI * x) * sin(PI * y);
+    };
+    // Solution exacte
+    std::function<double(double, double)> solution_exacte = [](double x, double y)->double{
+        return sin(PI * x) * std::sin(PI*y);
+    };
+    
+    std::vector<int> Ns = {5, 10, 20, 40, 80, 160};
+    std::vector<double> errs;
+    for(const int N : Ns){
+        std::vector<Node> nodes = setup_nodes(N);
+        std::vector<Element> triangles = setup_triangles(N);
+        auto K = get_global_mat(nodes, triangles);
+        auto F = get_global_f(nodes, triangles, f);
+        set_dirichlet_condition(nodes, K, F);
+        CSRMatrix csr_mat_K = CSRMatrix(K);
+        std::vector<double> U = solve_with_gc(csr_mat_K, F, 5, false);
+        double err = error_l2(nodes, triangles, U, solution_exacte);
+        //std::cout << "Error L2 (N=" + std::to_string(N) + ") : " << err << "\n";
+        errs.push_back(err);
+    }
+
+    int last = errs.size()-1;
+    std::cout<< "N | L2 Error | Errors[i] / Errors[i+1]\n";
+    for (int i = 0; i <= last; i++){
+        std::cout << Ns[i] << " | " << errs[i];
+        if (i != last){
+            std::cout << " | " << errs[i] / errs[i+1];
+        }
+        std::cout << "\n";
+    }
+
 }
 
-int main(){
+
+/* int main(){
     int N;
     std::cout << "Discrétisation N ?\n";
     std::cin >> N;
     std::vector<Node> nodes = setup_nodes(N);
     std::vector<Element> triangles = setup_triangles(N);
+
+
     std::function<double(double, double)> f = [](double x, double y)->double{ 
-        return 2 * PI * PI * sin(PI * x) * sin(PI * y);};
-    std::function<double(double, double)> solution_exacte = [](double x, double y)->double{
-        return sin(PI * x) * sin(PI*y);
+        return 2 * PI * PI * sin(PI * x) * sin(PI * y);
     };
+    std::function<double(double, double)> solution_exacte = [](double x, double y)->double{
+        return sin(PI * x) * std::sin(PI*y);
+    };
+    
+    
     auto K = get_global_mat(nodes, triangles);
     auto F = get_global_f(nodes, triangles, f);
+    bool verbose = false;
+    if (verbose){
+        display_mat(K);
+        printf("---\n");
+        display_vec(F);
+    }   
     set_dirichlet_condition(nodes, K, F);
-    //display_mat(K);
-    //display_vec(F);
+    if (verbose){
+        printf("Condition de dirichlet appliquée\n");
+        display_mat(K);
+        printf("---\n");
+        display_vec(F);
+    } 
     CSRMatrix csr_mat_K = CSRMatrix(K);
-    std::vector<double> U = solve_with_gc(csr_mat_K, F, 5);
-    //display_mat(K);
-    //display_vec(F);
-    std::string file_name = "solution_comparer_N" + std::to_string(N);
-    export_for_paraview(nodes, triangles, U, solution_exacte, file_name);
+    //std::vector<double> U = solve_with_gauss(K, F);
+    std::vector<double> U = solve_with_gc(csr_mat_K, F, 5, true);
+    //export_for_paraview(nodes, triangles, U, solution_exacte, file_name);
     
     double err = error_l2(nodes, triangles, U, solution_exacte);
     std::cout << "Error L2 (N=" + std::to_string(N) + ") : " << err << "\n";
+    //if (verbose) display_vec(U);
+
+    std::vector<double> U_sol = sample_function_on_nodes(nodes, solution_exacte);
+    std::vector<double> errs = errors(U, U_sol);
+    
+    std::string file_name = "Solutions/solution_comparer_N" + std::to_string(N) + " new";
+
+    VTK_Writer writer(file_name);
+    writer.set_mesh(nodes, triangles);
+    writer.add_scalar_field("U_h", U);
+    writer.add_scalar_field("U_exa", U_sol);
+    writer.add_scalar_field("Errors", errs);
+    writer.write();
 
     return 0;
+} */
+
+int main(){
+    check_l2_convergence();
 }

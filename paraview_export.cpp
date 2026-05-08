@@ -1,7 +1,7 @@
 #include "paraview_export.hpp"
 
 
-std::vector<double> sample_function_on_nodes(const std::vector<Node> &nodes, 
+/* std::vector<double> sample_function_on_nodes(const std::vector<Node> &nodes, 
     const std::function<double(double, double)> &func){
     std::vector<double> sample;
     sample.reserve(nodes.size());
@@ -9,7 +9,7 @@ std::vector<double> sample_function_on_nodes(const std::vector<Node> &nodes,
         sample.push_back(func(node.x, node.y));
     }
     return sample;
-}
+} */
 
 void export_for_paraview(const std::vector<Node> &nodes, const std::vector<Element> &triangles, 
     std::vector<double> &U, const std::function<double(double, double)> &sol_exacte, const std::string &file_name){

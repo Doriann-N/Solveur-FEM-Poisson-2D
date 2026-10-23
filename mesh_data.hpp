@@ -24,6 +24,16 @@ struct Element{
 
 // On génère les points sur [0, 1]²...
 std::vector<Node> setup_nodes(int N);
+
 int ij_to_index(int i, int j, int N);
-std::vector<Element> setup_triangles(int N);
+
+std::vector<Element> setup_triangles(int N, bool alternate_triangle_mesh);
+
 double triangle_area(const Node& A, const Node& B, const Node& C);
+
+std::vector<double> sample_function_on_nodes(
+    const std::vector<Node> &nodes, 
+    const std::function<double(double, double)> &func
+);
+
+void print_info_nodes(const std::vector<Node> &nodes);

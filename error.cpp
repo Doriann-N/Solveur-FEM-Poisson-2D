@@ -20,6 +20,7 @@ double error_l2(const std::vector<Node> &nodes, const std::vector<Element> &tria
     return std::sqrt(error);
 }
 
+/* Erreur locale au point x, on regarde |u_h(x) - u_exa(x)| */
 std::vector<double> errors(const std::vector<double>& u_approximation, const std::vector<double>& u_solution)
 {
     int n = u_approximation.size();

@@ -3,7 +3,11 @@
 #include <cassert>
 
 VTK_Writer::VTK_Writer(const std::string& p_filename){
-    filename = p_filename;
+    if (p_filename.find(".vtk") == std::string::npos){
+        /* Pas de .vtk, ce test vérifie s'il contient .vtk et non pas s'il fini par .vtk (nuance) */
+        filename = p_filename + ".vtk";
+    }
+    else filename = p_filename;
 }
 
 void VTK_Writer::set_mesh(
@@ -26,9 +30,9 @@ void VTK_Writer::set_filename(const std::string& name){
     filename = name;
 }
 void VTK_Writer::write() const
-{
+{   
+    std::ofstream file(filename);
 
-    std::ofstream file(filename + ".vtk");
     if (!file.is_open()){
         std::cout << "Impossible d'ouvrir le fichier\n";
     }

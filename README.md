@@ -13,20 +13,26 @@ $$
 $$
 
 Le problème considéré est :
+
 $$
 \begin{cases}
 -\Delta u = f & \text{dans } \Omega,\\
 u = 0 & \text{sur } \partial\Omega.
 \end{cases}
 $$
+
 Le second membre est défini par :
+
 $$
 f(x,y) = 2\pi^2\sin(\pi x)\sin(\pi y).
 $$
+
 La solution exacte est connue :
+
 $$
 u(x,y) = \sin(\pi x)\sin(\pi y).
 $$
+
 Cette solution analytique permet d'évaluer la précision de la solution numérique obtenue.
 
 ## Méthodes numériques

@@ -36,5 +36,5 @@ class Simulation{
         const std::vector<Node>& get_nodes() const;
         const CSRMatrix& get_matrix() const;
         const std::vector<double>& get_rhs_vector() const;
-        const float get_l2_error() const;
+        const float get_l2_error(bool print_error = true) const;
 };

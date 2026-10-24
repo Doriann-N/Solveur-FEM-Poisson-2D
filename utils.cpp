@@ -49,9 +49,9 @@ std::string ask_for_name_file(){
     return file_name;
 }
 
-bool ask_for_alternate_mesh_triangle(){
+bool ask_for_boolean(std::string what_to_ask){
     char response;
-    std::cout << "Alterner les triangles pour le mesh ? (o/n) : ";
+    std::cout << what_to_ask << " (o/n) : ";
     std::cin >> response;
     return (response == 'o'||response == 'O');
 }

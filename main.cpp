@@ -16,7 +16,8 @@ void check_l2_convergence(std::function<double(double, double)> f, std::function
     std::vector<double> errs;
     std::vector<double> times;
     for(const int N : Ns){
-        Simulation sim(N, f, false);
+        bool alternate_triangle = true;
+        Simulation sim(N, f, alternate_triangle);
         sim.set_solution_function(solution_exacte);
         double start_time = omp_get_wtime();
         sim.solve(50, false);
@@ -59,7 +60,7 @@ int main(){
     /* Alterner les triangles du maillages ? Un maillage 
     alterné résulte en une convergence en 2 étapes du gradient 
     conjugué, je ne sais pas si c'est lié très exactement à ça */
-    bool alternate_triangle = ask_for_alternate_mesh_triangle();
+    bool alternate_triangle = ask_for_boolean("Alterner les triangles pour le mesh ?");
     /* Demande de nom pour sauvegarder le fichier, vide 
     impliquera aucune sauvegarde */
     std::string filename = ask_for_name_file();
@@ -68,7 +69,7 @@ int main(){
     /* Indique si on va print des info lié à la 
     convergence avec le gradient conjugué */
     bool verbose = true;
-    sim.solve(100, verbose);
+    sim.solve(50, verbose);
     /* On définit la solution exacte pour calculer l'erreur */
     sim.set_solution_function(solution_exacte);
     float err = sim.get_l2_error();
@@ -79,7 +80,11 @@ int main(){
     //const auto& b = sim.get_rhs_vector();
 
     /* Pour voir le tableau comparatif des convergences */
-    //check_l2_convergence(f, solution_exacte);
+    bool show_convergence = ask_for_boolean("Montrer l'étude de convergence ?");
+    if (show_convergence){
+        std::cout << "Étude de la convergence :\n";
+        check_l2_convergence(f, solution_exacte);
+    }
 
     return 0;
 }

@@ -2,7 +2,7 @@
 
 ## Présentation
 
-Ce projet a été développé dans le cadre de mon apprentissage du C++ et des méthodes numériques, ici la méthode des éléments finis. J'ai developpé la génération de maillage triangulaire, l'assemblage du système linéaire issu de la discrétisation par éléments finis, le stockage de matrices creuses et la résolution par gradient conjugué. Le projet comprend également une étude de convergence et l'export des résultats pour leur visualisation dans ParaView. Le projet est développé en C++17 et utilise OpenMP pour paralléliser certaines opérations.
+Ce projet a été développé dans le cadre de mon apprentissage du C++, de git et des méthodes numériques, ici la méthode des éléments finis. J'ai developpé la génération de maillage triangulaire, l'assemblage du système linéaire issu de la discrétisation par éléments finis, le stockage de matrices creuses et la résolution par gradient conjugué. Le projet comprend également une étude de convergence et l'export des résultats pour leur visualisation dans ParaView. Le projet est développé en C++17 et utilise OpenMP pour paralléliser certaines opérations.
 
 ## Problème mathématique
 
@@ -25,7 +25,7 @@ f(x,y) = 2\pi^2\sin(\pi x)\sin(\pi y).
 $$
 La solution exacte est connue :
 $$
-u_{\mathrm{exacte}}(x,y) = \sin(\pi x)\sin(\pi y).
+u(x,y) = \sin(\pi x)\sin(\pi y).
 $$
 Cette solution analytique permet d'évaluer la précision de la solution numérique obtenue.
 
@@ -75,14 +75,16 @@ L'étude numérique permet de comparer l'ordre de convergence observé à cette 
 
 | N | Erreur L2 | Temps (s) | Rapport d'erreurs | Ordre expérimental |
 |:-:|:---------:|:---------:|:-----------------:|:------------------:|
-| 5 | 6.696359e-02 | 0.003269 | 3.895233 | 1.961709 |
-| 10 | 1.719117e-02 | 0.045012 | 3.974324 | 1.990709 |
-| 20 | 4.325558e-03 | 0.035203 | 3.993611 | 1.997694 |
-| 40 | 1.083119e-03 | 0.085963 | 3.998405 | 1.999425 |
-| 80 | 2.708879e-04 | 0.201112 | 3.999601 | 1.999856 |
-| 160 | 6.772872e-05 | 0.365821 | / | / |
+10 | 1.719117e-02 | 0.004371 | 3.974324 | 1.990709
+20 | 4.325558e-03 | 0.022889 | 3.993611 | 1.997694
+40 | 1.083119e-03 | 0.031041 | 3.998405 | 1.999425
+80 | 2.708879e-04 | 0.098123 | 3.999601 | 1.999856
+160 | 6.772872e-05 | 0.297993 | 3.999900 | 1.999964
+320 | 1.693260e-05 | 1.245667 | 3.999975 | 1.999991
+640 | 4.233177e-06 | 7.174297 | 3.999991 | 1.999997
+1280 | 1.058297e-06 | 24.120502 | / | / |
 
-Pour ce tableau, 4 threads ont été utilisés.
+Pour ce tableau, 4 threads ont été utilisés. On observe bien que l'erreur en norme L² diminue lorsque la résolution du maillage augmente. Le rapport entre deux erreurs successives est d'environ 4 comme c'est attendu théoriquement.
 
 ## Visualisation
 
@@ -97,16 +99,28 @@ Les fichiers exportés peuvent notamment contenir les champs suivants :
 ### Maillage
 
 ![Maillage triangulaire N = 10](Screens/mesh_n10.png)
+*Maillage avec une discrétisation à N = 10, les triangles sont alternés ici.*
 ### Solution numérique
 
-![Solution numérique sur le maillage triangulaire N = 40](Screens/solution_n40_mesh.png)
-![Solution numérique sur le maillage triangulaire N = 10](Screens/solution_n40_top.png)
-![Solution numérique sur le maillage triangulaire N = 10](Screens/solution_n10_mesh.png)
+![Solution numérique sur le maillage triangulaire N = 40](Screens/solution_n_40_mesh.png)
+*Solution vue de côté pour N = 40.*
+![Solution numérique sur le maillage triangulaire N = 10](Screens/solution_n_40_top.png)
+*Solution vue de dessus pour N = 40.*
+![Solution numérique sur le maillage triangulaire N = 10](Screens/solution_n_10_mesh.png)
+*Solution pour N = 10.*
 
 ### Distribution de l'erreur
 
-![Erreur nodale sur le maillage triangulaire N = 40](Screens/End_error_40.png)
-![Erreur nodale sur le maillage triangulaire N = 10](Screens/End_error_10_mesh.png)
+Pour l'erreur, on compare les valeurs de la solution numérique et celles de la solution exacte aux nœuds du maillage : $$|u(x,y)-u_h(x,y)|.$$
+
+![Erreur nodale sur le maillage triangulaire N = 40](Screens/error_n_40_alternate.png)
+*Erreur sur les noeuds du maillage pour N = 40.*
+![Erreur nodale sur le maillage triangulaire N = 10](Screens/error_n_10_alternate_mesh.png)
+*Erreur sur les noeuds pour N = 10.*
+![Erreur nodale sur le maillage triangulaire non alterné N = 40](Screens/error_n_40_no_alternate_mesh.png)
+*Erreur sur les noeuds avec un maillage triangulaire non alterné pour N = 40.*
+
+On observe une répartition de l'erreur différente en fonction de si le maillage est constitué de triangles qui sont alternés ou non. Dans le cas des triangles alternés, on observe que l'algorithme du gradient conjugué converge en deux itérations tandis qu'il en faut au moins cinquante dans le cas où les triangles ne sont pas alternés. En revanche, la norme L² est semblable. 
 
 ## Compilation et exécution
 

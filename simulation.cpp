@@ -54,14 +54,14 @@ void Simulation::set_solution_function(std::function<double(double, double)> sol
 }
 
 /* Pour obtenir la norme L2 de l'erreur, il faut la solution exacte. */
-const float Simulation::get_l2_error() const{
+const float Simulation::get_l2_error(bool print_error) const{
     /* On vérifie que la solution a bien été calculer */
     assert(!solution.empty());
     /* On vérifie qu'on a bien la solution exacte */
     assert(solution_function);
 
     double err = error_l2(nodes, triangles, solution, solution_function);
-    std::cout << "Erreur L2 : " << err << "\n";
+    if (print_error) std::cout << "Erreur L2 : " << err << "\n";
     return err;
 }
 

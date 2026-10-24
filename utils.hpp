@@ -30,4 +30,4 @@ void display_vector_int(const std::vector<int>& v);
 
 int ask_for_discretisation();
 std::string ask_for_name_file();
-bool ask_for_alternate_mesh_triangle();
+bool ask_for_boolean(std::string what_to_ask);

@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <limits>
 
 
 /* Ensemble de fonction qui m'aide pour l'affichage et autre */
@@ -35,7 +36,22 @@ void display_vector_int(const std::vector<int>& v){
 
 int ask_for_discretisation(){
     int N;
-    std::cout << "Discrétisation N ? ";
+    std::cout << "Discrétisation N : ";
     std::cin >> N;
     return N;
+}
+
+std::string ask_for_name_file(){
+    std::string file_name;
+    std::cout << "Nom du fichier ? (un nom vide impliquera pas de sauvegarde) : ";
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::getline(std::cin, file_name);
+    return file_name;
+}
+
+bool ask_for_alternate_mesh_triangle(){
+    char response;
+    std::cout << "Alterner les triangles pour le mesh ? (o/n) : ";
+    std::cin >> response;
+    return (response == 'o'||response == 'O');
 }

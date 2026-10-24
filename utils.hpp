@@ -29,3 +29,5 @@ void display_vec(const std::vector<double> &v);
 void display_vector_int(const std::vector<int>& v);
 
 int ask_for_discretisation();
+std::string ask_for_name_file();
+bool ask_for_alternate_mesh_triangle();

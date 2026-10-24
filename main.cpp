@@ -54,18 +54,31 @@ int main(){
         return sin(PI * x) * sin(PI * y);
     };
     
-
+    /* Discrétisation du maillage */
     int N = ask_for_discretisation();
-    Simulation sim(N, f, true);
-    sim.solve(50, true);
+    /* Alterner les triangles du maillages ? Un maillage 
+    alterné résulte en une convergence en 2 étapes du gradient 
+    conjugué, je ne sais pas si c'est lié très exactement à ça */
+    bool alternate_triangle = ask_for_alternate_mesh_triangle();
+    /* Demande de nom pour sauvegarder le fichier, vide 
+    impliquera aucune sauvegarde */
+    std::string filename = ask_for_name_file();
+    /* Prépare le maillage */
+    Simulation sim(N, f, alternate_triangle);
+    /* Indique si on va print des info lié à la 
+    convergence avec le gradient conjugué */
+    bool verbose = true;
+    sim.solve(100, verbose);
+    /* On définit la solution exacte pour calculer l'erreur */
     sim.set_solution_function(solution_exacte);
     float err = sim.get_l2_error();
     
-    //sim.save_vtk("Other_End_solution_N_" + std::to_string(N));
+    if (!filename.empty()) sim.save_vtk(filename);
     //print_info_nodes(sim.get_nodes());
     //const auto& A = sim.get_matrix();
     //const auto& b = sim.get_rhs_vector();
 
+    /* Pour voir le tableau comparatif des convergences */
     //check_l2_convergence(f, solution_exacte);
 
     return 0;

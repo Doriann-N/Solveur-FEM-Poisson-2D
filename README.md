@@ -120,7 +120,7 @@ Pour l'erreur, on compare les valeurs de la solution numérique et celles de la 
 ![Erreur nodale sur le maillage triangulaire non alterné N = 40](Screens/error_n_40_no_alternate_mesh.png)
 *Erreur sur les noeuds avec un maillage triangulaire non alterné pour N = 40.*
 
-On observe une répartition de l'erreur différente en fonction de si le maillage est constitué de triangles qui sont alternés ou non. Dans le cas des triangles alternés, on observe que l'algorithme du gradient conjugué converge en deux itérations tandis qu'il en faut au moins cinquante dans le cas où les triangles ne sont pas alternés. En revanche, la norme L² est semblable. 
+On observe une répartition de l'erreur différente en fonction de si le maillage est constitué de triangles qui sont alternés ou non. Dans le cas des triangles alternés, on observe que l'algorithme du gradient conjugué converge en deux itérations tandis qu'il en faut au moins cinquante dans le cas où les triangles ne sont pas alternés. Une analyse complémentaire serait nécessaire pour expliquer les raisons de ces différences. En revanche, la norme L² est semblable.
 
 ## Compilation et exécution
 
